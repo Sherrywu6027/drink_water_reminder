@@ -1,0 +1,96 @@
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    background: #A8E6CF; /* 更典型的健康绿 */
+    margin: 0;
+    padding: 0;
+    color: #222;
+}
+#animation-area {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none; /* 允许设置区交互 */
+}
+#animation-area canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+}
+#settings-toggle {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    width: 56px;
+    height: 56px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    transition: box-shadow 0.2s, background 0.2s;
+}
+#settings-toggle:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+    background: #F0FFF5;
+}
+#settings-area {
+    position: fixed;
+    right: 32px;
+    bottom: 32px;
+    width: 340px;
+    background: rgba(255,255,255,0.96);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 20px 24px 16px 24px;
+    box-sizing: border-box;
+    z-index: 30;
+    transition: opacity 0.2s, transform 0.2s;
+    opacity: 1;
+    transform: translateY(0);
+}
+#settings-area[style*='display: none'] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(40px);
+}
+#settings-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    color: #888;
+}
+#settings-area label {
+    display: inline-block;
+    min-width: 72px;
+    margin-top: 8px;
+}
+#settings-area input[type=range] {
+    width: 120px;
+    vertical-align: middle;
+}
+#settings-area select {
+    margin-left: 8px;
+    margin-bottom: 8px;
+}
+#stats-area {
+    position: fixed;
+    left: 32px;
+    bottom: 32px;
+    width: 220px;
+    background: rgba(255,255,255,0.96);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 16px 20px;
+    box-sizing: border-box;
+    z-index: 10;
+} 

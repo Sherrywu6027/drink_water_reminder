@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build artifacts
+build/
+dist/
+tmp_build/
+tmp_pyinstaller_cache/
+*.spec.bak
+
+# Release binaries should be uploaded to GitHub Releases, not committed
+发布版/
+*.exe
+
+# Local runtime data / personal data
+user_config.json
+user_permissions.json
+drink_data.json
+friends.json
+friend_reminders.json
+reminder_settings.json
+eye_autorecord.txt
+护眼/eye_autorecord.txt
+*.log
+error.log
+
+# Local archives and experimental side projects
+archive/
+web_cutout/
+docs/superpowers/
+remove-image-background-skill.zip
+
+# Legacy/large pet source images not needed by the app runtime
+assets/pic/
+assets/pic_tm/
+assets/desktop_pets/*_ai_test.png
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
