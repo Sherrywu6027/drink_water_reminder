@@ -458,6 +458,12 @@ def test_desktop_pet_catalog_and_interaction_helpers_exist():
     assert app.describe_pet_mood(10)
     assert app.get_pet_mood({"pet_moods": {"pet": 80}}, "pet") == 80
     assert app.get_pet_mood_feedback(85)
+    rule_text = app.format_pet_mood_rule_summary_text()
+    assert "定时健康提醒弹出一次：-3" in rule_text
+    assert "完成一次健康记录：+8" in rule_text
+    assert "番茄时钟完成：+5" in rule_text
+    assert "当天四项目标全部完成：+10" in rule_text
+    assert "每天首次陪伴恢复：+2" in rule_text
     assert app.get_pet_mood_bar_color(85)
     assert app.get_pet_mood_bar_color(55)
     assert app.get_pet_mood_bar_color(35)
@@ -491,6 +497,10 @@ def test_desktop_pet_catalog_and_interaction_helpers_exist():
     assert 'text="未解锁"' in catalog_source
     assert 'create_text(36, 36, text="?"' in catalog_source
     assert '"抽到后开始陪伴"' in catalog_source
+    assert "心情说明" in catalog_source
+    assert "show_mood_rules_tooltip" in catalog_source
+    assert "open_mood_rules_dialog" in catalog_source
+    assert "format_pet_mood_rule_summary_text()" in catalog_source
     assert "_fit_bubble_text" in inspect.getsource(app.DesktopPetWindow.show_message)
     assert "target.update_pet(pet, pet_display_name, pet_life_days=pet_life_days, pet_mood=pet_mood)" in redraw_source
     assert "is_pet_state_unlocked(state_name, self.pet_life_days)" in show_state_source

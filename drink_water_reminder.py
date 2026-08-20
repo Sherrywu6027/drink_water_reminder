@@ -1673,6 +1673,39 @@ def get_low_pet_mood_message(mood):
     return None
 
 
+def get_pet_mood_rule_summary():
+    return {
+        "decrease": [
+            "定时健康提醒弹出一次：-3",
+            "未完成一整天四项目标：不会额外加成",
+        ],
+        "increase": [
+            "完成一次健康记录：+8",
+            "番茄时钟完成：+5",
+            "当天四项目标全部完成：+10（每天一次）",
+            "每天首次陪伴恢复：+2（每天一次）",
+        ],
+        "note": [
+            "心情值范围 0～100",
+            "只在当前已选宠物上生效",
+            "番茄专注期间不会触发健康提醒，也不会再扣心情",
+        ],
+    }
+
+
+def format_pet_mood_rule_summary_text():
+    rules = get_pet_mood_rule_summary()
+    lines = ["心情规则说明", "", "会降低："]
+    lines.extend(["- {}".format(item) for item in rules["decrease"]])
+    lines.append("")
+    lines.append("会增加：")
+    lines.extend(["- {}".format(item) for item in rules["increase"]])
+    lines.append("")
+    lines.append("补充：")
+    lines.extend(["- {}".format(item) for item in rules["note"]])
+    return "\n".join(lines)
+
+
 def get_pet_mood_bar_color(mood):
     mood = clamp_pet_mood(mood)
     if mood >= 80:
@@ -2565,6 +2598,43 @@ class HealthMainPage:
             except tk.TclError:
                 pass
 
+        def show_mood_rules_tooltip(widget):
+            hide_mood_rules_tooltip()
+            tooltip = tk.Toplevel(catalog)
+            tooltip.overrideredirect(True)
+            tooltip.attributes("-topmost", True)
+            tooltip.configure(bg="#173c36")
+            x = widget.winfo_rootx() + 12
+            y = widget.winfo_rooty() + widget.winfo_height() + 8
+            tooltip.geometry("+{}+{}".format(x, y))
+            tk.Label(
+                tooltip,
+                text="悬浮查看心情规则，点击看完整说明",
+                font=("微软雅黑", 9),
+                bg="#173c36",
+                fg="#ffffff",
+                padx=10,
+                pady=6,
+            ).pack()
+            catalog._mood_rules_tooltip = tooltip
+
+        def hide_mood_rules_tooltip(event=None):
+            tooltip = getattr(catalog, "_mood_rules_tooltip", None)
+            if tooltip is None:
+                return
+            try:
+                tooltip.destroy()
+            except tk.TclError:
+                pass
+            catalog._mood_rules_tooltip = None
+
+        def open_mood_rules_dialog(event=None):
+            messagebox.showinfo(
+                "心情规则说明",
+                format_pet_mood_rule_summary_text(),
+                parent=catalog,
+            )
+
         list_frame.bind("<Configure>", refresh_scrollregion)
         canvas.bind("<Configure>", resize_list_width)
         catalog.bind("<MouseWheel>", on_mousewheel)
@@ -2654,11 +2724,31 @@ class HealthMainPage:
                 row, text="生命 {} 天".format(life_days),
                 font=("微软雅黑", 11), bg="#ffffff", fg="#536172",
             ).grid(row=1, column=2, sticky="w", pady=(5, 0))
-            mood_bar = tk.Canvas(row, width=180, height=10, bg="#edf1f5", bd=0, highlightthickness=0)
-            mood_bar.grid(row=1, column=2, sticky="e", padx=(0, 4), pady=(5, 0))
+            mood_line = tk.Frame(row, bg="#ffffff")
+            mood_line.grid(row=1, column=2, sticky="e", padx=(0, 4), pady=(5, 0))
+            mood_bar = tk.Canvas(mood_line, width=180, height=10, bg="#edf1f5", bd=0, highlightthickness=0)
+            mood_bar.pack(side=tk.LEFT)
             mood_width = int(180 * clamp_pet_mood(mood) / 100) if is_unlocked else 0
             mood_bar.create_rectangle(0, 0, 180, 10, fill="#edf1f5", outline="")
             mood_bar.create_rectangle(0, 0, mood_width, 10, fill=get_pet_mood_bar_color(mood), outline="")
+            mood_help = tk.Label(
+                mood_line,
+                text="心情说明",
+                font=("微软雅黑", 9, "bold"),
+                bg="#eef7f1" if is_unlocked else "#eef2f6",
+                fg="#2f8f7b" if is_unlocked else "#7b8794",
+                padx=8,
+                pady=2,
+                cursor="hand2",
+                relief=tk.FLAT,
+            )
+            mood_help.pack(side=tk.LEFT, padx=(8, 0))
+            mood_help.bind("<Enter>", lambda e, w=mood_help: show_mood_rules_tooltip(w))
+            mood_help.bind("<Leave>", hide_mood_rules_tooltip)
+            mood_help.bind("<Button-1>", open_mood_rules_dialog)
+            mood_bar.bind("<Enter>", lambda e, w=mood_help: show_mood_rules_tooltip(w))
+            mood_bar.bind("<Leave>", hide_mood_rules_tooltip)
+            mood_bar.bind("<Button-1>", open_mood_rules_dialog)
             tk.Label(
                 row, text="已解锁：{}".format(format_pet_catalog_unlocked_states(life_days) if is_unlocked else "未解锁"),
                 font=("微软雅黑", 10), bg="#ffffff", fg="#102033",
@@ -4982,4 +5072,3 @@ if __name__ == "__main__":
     except Exception as e:
         log_exception(e)
         messagebox.showerror("错误", "程序发生异常，请查看日志文件并联系开发者：\n{}".format(LOG_FILE))
-
