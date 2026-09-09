@@ -2065,6 +2065,33 @@ class DesktopPetWindow(tk.Toplevel):
         except tk.TclError:
             return
 
+    def restore_to_screen(self):
+        """Restore a hidden/docked pet to a safe position inside the screen."""
+        try:
+            self.update_idletasks()
+            width = self.winfo_width() or 310
+            height = self.winfo_height() or 340
+            screen_w = self.winfo_screenwidth()
+            screen_h = self.winfo_screenheight()
+            margin = 24
+            max_x = max(margin, screen_w - width - margin)
+            max_y = max(margin, screen_h - height - margin)
+            current_x = self.winfo_x()
+            current_y = self.winfo_y()
+            if self._is_docked or current_x < margin or current_x > max_x:
+                current_x = max_x
+            if current_y < margin or current_y > max_y:
+                current_y = max_y
+            self._is_docked = False
+            self._dock_side = None
+            self.geometry("+{}+{}".format(current_x, current_y))
+            save_user_config_fields(desktop_pet_docked=False, desktop_pet_dock_side="")
+            self.deiconify()
+            self.lift()
+            self.attributes("-topmost", True)
+        except tk.TclError:
+            return
+
     def _on_click(self, event=None):
         if self._is_docked:
             self._expand_from_dock()
@@ -2484,6 +2511,7 @@ class HealthMainPage:
     def open_desktop_pet(self):
         try:
             if self.desktop_pet_window is not None and self.desktop_pet_window.winfo_exists():
+                self.desktop_pet_window.restore_to_screen()
                 self.desktop_pet_window.lift()
                 return
         except tk.TclError:

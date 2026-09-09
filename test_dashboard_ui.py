@@ -491,6 +491,12 @@ def test_desktop_pet_catalog_and_interaction_helpers_exist():
     assert "mark_desktop_pet_unlocked(pet_id" in redraw_source
     assert "mark_desktop_pet_unlocked(pet_id" in inspect.getsource(app.HealthMainPage.open_desktop_pet)
     catalog_source = inspect.getsource(app.HealthMainPage.open_desktop_pet_catalog)
+    open_pet_source = inspect.getsource(app.HealthMainPage.open_desktop_pet)
+    pet_restore_source = inspect.getsource(app.DesktopPetWindow.restore_to_screen)
+    assert "restore_to_screen()" in open_pet_source
+    assert "self._is_docked = False" in pet_restore_source
+    assert "desktop_pet_docked=False" in pet_restore_source
+    assert "self.deiconify()" in pet_restore_source
     assert "unlocked_pet_ids = load_unlocked_pet_ids(config)" in catalog_source
     assert "is_unlocked = pet.get(\"id\") in unlocked_pet_ids" in catalog_source
     assert 'text=pet["name"] if is_unlocked else "？？？"' in catalog_source
