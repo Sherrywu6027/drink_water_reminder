@@ -1769,7 +1769,7 @@ class DesktopPetWindow(tk.Toplevel):
             progress_summary=None, pet_life_days=1, pet_mood=PET_MOOD_DEFAULT,
             on_start_pomodoro=None, on_cancel_pomodoro=None, pomodoro_status=None,
             on_show_progress=None, on_record_health=None, on_start_eye_training=None,
-            on_toggle_pause=None):
+            on_toggle_pause=None, on_pet_click=None):
         super().__init__(master)
         self.nickname = nickname or "朋友"
         self.theme_colors = theme_colors
@@ -1788,6 +1788,7 @@ class DesktopPetWindow(tk.Toplevel):
         self.on_record_health = on_record_health
         self.on_start_eye_training = on_start_eye_training
         self.on_toggle_pause = on_toggle_pause
+        self.on_pet_click = on_pet_click
         self._drag_offset = (0, 0)
         self._is_docked = False
         self._dock_side = None
@@ -2104,7 +2105,7 @@ class DesktopPetWindow(tk.Toplevel):
                 self.after_cancel(self._click_after_id)
             except tk.TclError:
                 pass
-        self._click_after_id = self.after(180, self._say_random)
+        self._click_after_id = self.after(180, lambda: self._say_random(reward_click=True))
 
     def _on_double_click(self, event=None):
         if self._click_after_id:
@@ -2116,6 +2117,7 @@ class DesktopPetWindow(tk.Toplevel):
         if self._is_pomodoro_active():
             self._show_pomodoro_status()
             return
+        self._reward_click_mood()
         if self.progress_summary:
             self.show_state("happy", duration_ms=60 * 1000)
             self.show_message(self.progress_summary())
@@ -2187,11 +2189,17 @@ class DesktopPetWindow(tk.Toplevel):
             except tk.TclError:
                 pass
 
-    def _say_random(self):
+    def _reward_click_mood(self):
+        if self.on_pet_click:
+            self.on_pet_click()
+
+    def _say_random(self, reward_click=False):
         self._click_after_id = None
         if self._is_pomodoro_active():
             self._show_pomodoro_status()
             return
+        if reward_click:
+            self._reward_click_mood()
         self._active_state = None
         if self._sprite_frames:
             self._pose = random.randrange(len(self._sprite_frames))
@@ -2549,6 +2557,7 @@ class HealthMainPage:
             on_record_health=self.pet_record_health,
             on_start_eye_training=self.pet_start_eye_training,
             on_toggle_pause=self.pet_toggle_reminder_pause,
+            on_pet_click=self.pet_click_mood,
         )
         if pet_life_message:
             self.desktop_pet_window.show_message(pet_life_message)
@@ -3072,6 +3081,9 @@ class HealthMainPage:
 
     def pet_record_health(self, key):
         self.record_action(key)
+
+    def pet_click_mood(self):
+        self.adjust_current_pet_mood(1)
 
     def pet_start_eye_training(self):
         self.show_desktop_pet_state("eye", message="开始护眼训练，眼睛休息一下。", fallback_state="happy")

@@ -371,6 +371,9 @@ def test_dashboard_exposes_desktop_pet_command_and_reuses_window():
 
 def test_desktop_pet_menu_exposes_quick_tools_without_blocking_features():
     init_source = inspect.getsource(app.DesktopPetWindow.__init__)
+    click_source = inspect.getsource(app.DesktopPetWindow._on_click)
+    double_click_source = inspect.getsource(app.DesktopPetWindow._on_double_click)
+    random_source = inspect.getsource(app.DesktopPetWindow._say_random)
     menu_source = inspect.getsource(app.DesktopPetWindow._refresh_menu)
     pomodoro_source = inspect.getsource(app.HealthMainPage.start_pet_pomodoro)
     countdown_source = inspect.getsource(app.HealthMainPage.update_pet_pomodoro_countdown)
@@ -388,6 +391,11 @@ def test_desktop_pet_menu_exposes_quick_tools_without_blocking_features():
     assert "on_start_pomodoro" in init_source
     assert "on_show_progress" in init_source
     assert "on_record_health" in init_source
+    assert "on_pet_click" in init_source
+    assert "reward_click=True" in click_source
+    assert "_reward_click_mood()" in double_click_source
+    assert "if reward_click:" in random_source
+    assert "self.on_pet_click()" in inspect.getsource(app.DesktopPetWindow._reward_click_mood)
     assert "开始番茄时钟" in menu_source
     assert "结束番茄时钟" in menu_source
     assert "查看今日进度" in menu_source
@@ -550,6 +558,14 @@ def test_pet_mood_recovers_once_per_day():
         assert changed is False
     finally:
         app.save_user_config_fields = original_save_user_config_fields
+
+
+def test_pet_click_mood_adds_one_point():
+    page = object.__new__(app.HealthMainPage)
+    deltas = []
+    page.adjust_current_pet_mood = deltas.append
+    page.pet_click_mood()
+    assert deltas == [1]
 
 
 def test_pet_goal_reward_and_low_mood_helpers():
