@@ -1795,6 +1795,8 @@ class DesktopPetWindow(tk.Toplevel):
         self._visible_strip = 28
         self._message_index = 0
         self._click_after_id = None
+        self._mood_reward_after_id = None
+        self._mood_reward_items = []
         self._pose = 0
         self._sprite_frames = []
         self._state_frames = {}
@@ -2118,6 +2120,7 @@ class DesktopPetWindow(tk.Toplevel):
             self._show_pomodoro_status()
             return
         self._reward_click_mood()
+        self._show_mood_reward()
         if self.progress_summary:
             self.show_state("happy", duration_ms=60 * 1000)
             self.show_message(self.progress_summary())
@@ -2208,6 +2211,58 @@ class DesktopPetWindow(tk.Toplevel):
         self._draw_pet()
         self.show_message(self.pet["messages"][self._message_index % len(self.pet["messages"])])
         self._message_index += 1
+        if reward_click:
+            self._show_mood_reward()
+
+    def _show_mood_reward(self):
+        self._clear_mood_reward()
+        try:
+            bubble = self.pet_canvas.create_oval(
+                76, 18, 156, 54,
+                fill="#fff0f5", outline="#e889a8", width=2,
+                tags="mood_reward",
+            )
+            text = self.pet_canvas.create_text(
+                116, 36, text="♥ +1",
+                font=("微软雅黑", 13, "bold"),
+                fill="#d94f7a", tags="mood_reward",
+            )
+            self._mood_reward_items = [bubble, text]
+            self._mood_reward_after_id = self.after(
+                70, lambda: self._animate_mood_reward(0)
+            )
+        except tk.TclError:
+            self._mood_reward_items = []
+            self._mood_reward_after_id = None
+
+    def _animate_mood_reward(self, step):
+        self._mood_reward_after_id = None
+        if not self._mood_reward_items:
+            return
+        try:
+            if step >= 10:
+                self.pet_canvas.delete("mood_reward")
+                self._mood_reward_items = []
+                return
+            self.pet_canvas.move("mood_reward", 0, -3)
+            self._mood_reward_after_id = self.after(
+                70, lambda: self._animate_mood_reward(step + 1)
+            )
+        except tk.TclError:
+            self._mood_reward_items = []
+
+    def _clear_mood_reward(self):
+        if self._mood_reward_after_id:
+            try:
+                self.after_cancel(self._mood_reward_after_id)
+            except tk.TclError:
+                pass
+        self._mood_reward_after_id = None
+        self._mood_reward_items = []
+        try:
+            self.pet_canvas.delete("mood_reward")
+        except tk.TclError:
+            pass
 
     def _reset_pet_pose(self):
         self._animation_after_id = None

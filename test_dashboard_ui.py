@@ -396,6 +396,12 @@ def test_desktop_pet_menu_exposes_quick_tools_without_blocking_features():
     assert "_reward_click_mood()" in double_click_source
     assert "if reward_click:" in random_source
     assert "self.on_pet_click()" in inspect.getsource(app.DesktopPetWindow._reward_click_mood)
+    assert "def _show_mood_reward" in pet_window_source
+    assert "def _animate_mood_reward" in pet_window_source
+    assert "def _clear_mood_reward" in pet_window_source
+    assert "mood_reward" in pet_window_source
+    assert "self._show_mood_reward()" in double_click_source
+    assert "self._show_mood_reward()" in random_source
     assert "开始番茄时钟" in menu_source
     assert "结束番茄时钟" in menu_source
     assert "查看今日进度" in menu_source
